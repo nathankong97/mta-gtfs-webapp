@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -27,10 +27,38 @@
       </header>
 
       <article>
-        <p>If you can read this, the frontend stack is wired correctly.</p>
+        <header>
+          <h2>Live Status (Mock)</h2>
+          <small
+            >Auto-refreshes every 30 seconds • You can also click Refresh</small
+          >
+        </header>
+
+        <!-- Indicator shown while request is in-flight -->
+        <div id="loading" class="secondary" style="display: none">Loading…</div>
+
+        <!-- Live container populated by htmx -->
+        <div
+          id="live"
+          hx-get="/api/status"
+          hx-trigger="load, every 30s"
+          hx-swap="innerHTML"
+          hx-indicator="#loading"
+        ></div>
+
+        <!-- Manual refresh -->
+        <button
+          class="contrast"
+          hx-get="/api/status"
+          hx-target="#live"
+          hx-swap="innerHTML"
+          hx-indicator="#loading"
+        >
+          Refresh
+        </button>
       </article>
     </main>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>
