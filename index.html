@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MTA 7 Line Live</title>
 
-    <!-- Pico CSS (responsive, zero-config) -->
+    <!-- Pico CSS -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
@@ -18,45 +18,231 @@
       crossorigin="anonymous"
       defer
     ></script>
+
+    <script>
+      (function () {
+        const el = document.getElementById("liveClock");
+        if (!el) return;
+        const fmt = new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/New_York",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        function tick() {
+          el.textContent = "NY time: " + fmt.format(new Date());
+        }
+        tick();
+        setInterval(tick, 1000);
+      })();
+    </script>
+
+    <style>
+      /* Nearby panel tweaks */
+      .nearby-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .nearby-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0.8rem;
+        border: var(--pico-border-width) solid var(--pico-muted-border-color);
+        border-radius: 12px;
+        background: var(--pico-card-background-color);
+      }
+      .nearby-title {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+      .nearby-title strong {
+        font-size: 0.95rem;
+        line-height: 1.1;
+      }
+      .nearby-title small {
+        color: var(--pico-muted-color);
+      }
+      .nearby-actions {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: 0.5rem;
+      }
+
+      .btn-sm {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.55rem;
+        border-radius: 10px;
+      }
+      .twocol {
+        display: grid;
+        gap: 1rem;
+      }
+      @media (min-width: 900px) {
+        .twocol {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+      @media (max-width: 600px) {
+        #useLocBtn {
+          width: 100%;
+        }
+      } /* nicer button on phones */
+
+      /* Keep tables readable on narrow screens */
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.25rem;
+        }
+        h2 {
+          font-size: 1.05rem;
+        }
+        table {
+          font-size: 0.95rem;
+        }
+      }
+      /* Subtle loading bar tied to hx-indicator */
+      #loading[aria-busy="true"] {
+        display: block !important;
+      }
+
+      #arrivals thead th,
+      #arrivals tbody td {
+        padding: 0.55rem 0.7rem;
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        text-overflow: clip;
+        max-width: 10rem; /* cap width so it doesn't blow up table */
+        -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+        scrollbar-width: thin; /* Firefox: thinner scrollbar */
+      }
+
+      #arrivals tbody td::-webkit-scrollbar {
+        height: 4px; /* very slim, not intrusive */
+      }
+      #arrivals tbody td::-webkit-scrollbar-thumb {
+        background: var(--pico-muted-border-color);
+        border-radius: 4px;
+      }
+
+      @media (max-width: 600px) {
+        #arrivals thead th:nth-child(6),
+        #arrivals tbody td:nth-child(6) {
+          display: none; /* hide Status on narrow phones */
+        }
+        #arrivals tbody td {
+          max-width: 8rem; /* even tighter for small screens */
+        }
+      }
+
+      #arrivals.refreshed {
+        animation: flash 0.3s;
+      }
+      @keyframes flash {
+        from {
+          background-color: #fff3cd;
+        } /* light yellow */
+        to {
+          background-color: transparent;
+        }
+      }
+    </style>
   </head>
   <body>
     <main class="container">
       <header>
         <h1>MTA 7 Line Live</h1>
-        <p class="contrast">Vanilla + htmx + Pico scaffold</p>
+        <p class="contrast">
+          Realtime arrivals for 7 / 7X (default: Vernon Blvd-Jackson Av)
+        </p>
+        <small id="liveClock" class="contrast">NY time: —</small>
       </header>
 
-      <article>
-        <header>
-          <h2>Live Status (Mock)</h2>
-          <small
-            >Auto-refreshes every 30 seconds • You can also click Refresh</small
+      <article class="twocol">
+        <!-- LEFT: Arrivals -->
+        <section>
+          <header>
+            <h2>Arrivals — Vernon Blvd-Jackson Av (S)</h2>
+            <small>Auto-refreshes every 15s · Manual refresh available</small>
+          </header>
+
+          <progress
+            id="loading"
+            class="secondary"
+            style="display: none"
+            aria-busy="false"
+          ></progress>
+
+          <div class="table-wrap">
+            <div
+              id="arrivals"
+              hx-get="/api/arrivals?stopId=721S&horizonMin=30"
+              hx-trigger="load, every 15s"
+              hx-swap="innerHTML"
+              hx-indicator="#loading"
+              hx-on:htmx:before-request="document.querySelector('#loading').setAttribute('aria-busy','true')"
+              hx-on:htmx:after-request="document.querySelector('#loading').setAttribute('aria-busy','false')"
+              hx-on:htmx:after-swap="this.classList.add('refreshed'); setTimeout(()=>this.classList.remove('refreshed'), 300)"
+            ></div>
+          </div>
+
+          <button
+            class="contrast"
+            hx-get="/api/arrivals?stopId=721S&horizonMin=30"
+            hx-target="#arrivals"
+            hx-swap="innerHTML"
+            hx-indicator="#loading"
           >
-        </header>
+            Refresh
+          </button>
+        </section>
 
-        <!-- Indicator shown while request is in-flight -->
-        <div id="loading" class="secondary" style="display: none">Loading…</div>
-        <div
-          id="live"
-          hx-get="/api/arrivals?stopId=721S&horizonMin=30"
-          hx-trigger="load, every 30s"
-          hx-swap="innerHTML"
-          hx-indicator="#loading"
-        ></div>
+        <!-- RIGHT: Nearby (filled by geolocation) -->
+        <aside>
+          <header>
+            <h3>Nearby stops</h3>
+            <small>Find closest 7/7X stations from your location</small>
+          </header>
 
-        <!-- Manual refresh -->
-        <button
-          class="contrast"
-          hx-get="/api/status"
-          hx-target="#live"
-          hx-swap="innerHTML"
-          hx-indicator="#loading"
-        >
-          Refresh
-        </button>
+          <p class="grid" style="align-items: center; gap: 0.5rem">
+            <button id="useLocBtn" class="primary" type="button">
+              📍 Use my location
+            </button>
+            <small id="locLabel" class="contrast">Loc: —</small>
+          </p>
+
+          <div class="table-wrap">
+            <div id="nearby"><em>Grant location to see nearby stops.</em></div>
+          </div>
+        </aside>
       </article>
     </main>
 
     <script type="module" src="/main.js"></script>
+    <script>
+      (function () {
+        const el = document.getElementById("liveClock");
+        if (!el) return;
+        const fmt = new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/New_York",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        function tick() {
+          el.textContent = "NY time: " + fmt.format(new Date());
+        }
+        tick();
+        setInterval(tick, 1000);
+      })();
+    </script>
   </body>
 </html>

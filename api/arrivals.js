@@ -79,16 +79,24 @@ export default async function handler(req, res) {
     }
 
     const { feed, fetchedAt } = await getFeedDecoded();
-    const ageSec = Math.round((Date.now() - fetchedAt) / 1000);
 
-    // Header timestamp
+    // Pull header timestamp if present
     let headerTs = null;
     const rawTs = feed.header && feed.header.timestamp;
-    if (rawTs && typeof rawTs.toNumber === "function")
+    if (rawTs && typeof rawTs.toNumber === "function") {
       headerTs = rawTs.toNumber();
-    else if (rawTs != null) headerTs = Number(rawTs);
+    } else if (rawTs != null) {
+      headerTs = Number(rawTs);
+    }
 
+    // Now compute age (prefer server timestamp; fallback to cache timestamp)
     const nowSec = Math.floor(Date.now() / 1000);
+    let ageSec = 0;
+    if (headerTs) {
+      ageSec = Math.max(0, nowSec - headerTs);
+    } else if (fetchedAt) {
+      ageSec = Math.max(0, Math.round((Date.now() - fetchedAt) / 1000));
+    }
     const horizonSec = HORIZON_MIN * 60;
 
     // 1) Build vehicle map by tripId (route-filtered to 7/7X)

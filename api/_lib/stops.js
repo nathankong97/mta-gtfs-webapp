@@ -78,3 +78,30 @@ export async function lookupStop(stopIdRaw) {
 
   return null;
 }
+
+
+export async function listStopsForSeven() {
+  const { byId } = await loadStopsMap();
+  const acc = new Map(); // baseId -> { idBase, name, lat, lon, variants: {N,S,E,W} }
+
+  for (const [idU, info] of byId.entries()) {
+    const m = idU.match(/^(7\d{2})([NSEW])?$/); // 701..726 with optional dir suffix
+    if (!m) continue;
+    const base = m[1];
+    const dir = m[2] || "";
+    const baseInfo = byId.get(base) || info;
+
+    const cur = acc.get(base) || {
+      idBase: base,
+      name: baseInfo.name || info.name || base,
+      lat: baseInfo.lat ?? info.lat ?? null,
+      lon: baseInfo.lon ?? info.lon ?? null,
+      variants: {}
+    };
+    if (dir) cur.variants[dir] = idU; // e.g., N -> 721N
+    acc.set(base, cur);
+  }
+
+  // Drop any stations missing coords
+  return Array.from(acc.values()).filter(s => s.lat != null && s.lon != null);
+}
