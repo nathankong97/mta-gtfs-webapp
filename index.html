@@ -36,11 +36,9 @@
 
         <!-- Indicator shown while request is in-flight -->
         <div id="loading" class="secondary" style="display: none">Loading…</div>
-
-        <!-- Live container populated by htmx -->
         <div
           id="live"
-          hx-get="/api/status"
+          hx-get="/api/arrivals?stopId=721S&horizonMin=30"
           hx-trigger="load, every 30s"
           hx-swap="innerHTML"
           hx-indicator="#loading"
