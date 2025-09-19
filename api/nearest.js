@@ -61,16 +61,22 @@ export default async function handler(req, res) {
                 <small>${distM} m away</small>
               </div>
               <div class="nearby-actions">
-                <button class="secondary outline btn-sm"
-                  hx-get="/api/arrivals?stopId=${encodeURIComponent(
-                    nId
-                  )}&horizonMin=30"
-                  hx-target="#arrivals" hx-swap="innerHTML">View N</button>
-                <button class="secondary outline btn-sm"
-                  hx-get="/api/arrivals?stopId=${encodeURIComponent(
-                    sId
-                  )}&horizonMin=30"
-                  hx-target="#arrivals" hx-swap="innerHTML">View S</button>
+                <button class="to-arrivals secondary outline btn-sm"
+                  data-stopid="${nId}"
+                  hx-get="/api/arrivals"
+                  hx-vals='{"stopId":"${nId}","horizonMin":30}'
+                  hx-target="#arrivals" hx-swap="innerHTML"
+                  hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
+                  View N
+                </button>
+                <button class="to-arrivals secondary outline btn-sm"
+                  data-stopid="${sId}"
+                  hx-get="/api/arrivals"
+                  hx-vals='{"stopId":"${sId}","horizonMin":30}'
+                  hx-target="#arrivals" hx-swap="innerHTML"
+                  hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
+                  View S
+                </button>
               </div>
             </div>`;
             })

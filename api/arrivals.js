@@ -2,7 +2,6 @@
 // Usage: /api/arrivals?stopId=721S&horizonMin=30
 // Default: stopId=721S (Vernon Blvd–Jackson Av, Queens-bound), horizonMin=30
 
-import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { getFeedDecoded } from "./_lib/feed.js";
 import { lookupStop } from "./_lib/stops.js";
 
@@ -240,11 +239,11 @@ export default async function handler(req, res) {
             .join("");
 
     const html = `
-      <h3>Arrivals — 7 / 7X • stopId ${stopId}</h3>
+      <h3>Arrivals — 7 / 7X • ${await labelStop(stopId)}</h3>
       <p class="contrast">
   Updated ${fmtNY(nowSec)} • Feed ts ${
       headerTs ? fmtNY(headerTs) : "—"
-    } • Source age ${ageSec}s • Window ${HORIZON_MIN} min
+    } • Source age ${ageSec}s • Window ${HORIZON_MIN} min • ${stopId}
 </p>
       <table role="grid">
         <thead>
