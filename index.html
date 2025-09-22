@@ -85,7 +85,7 @@
       }
       @media (min-width: 900px) {
         .twocol {
-          grid-template-columns: 2fr 1fr;
+          grid-template-columns: 1fr 2fr;
         }
       }
       @media (max-width: 600px) {
@@ -94,7 +94,17 @@
         }
       } /* nicer button on phones */
 
-      /* Keep tables readable on narrow screens */
+      @media (min-width: 900px) {
+      aside {
+        position: sticky;
+        top: 0.75rem;
+        align-self: start;
+        max-height: calc(100vh - 2rem);
+        overflow: auto;
+      }
+    }
+
+      /* Table container scroll (not per-cell) */
       .table-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -115,63 +125,119 @@
         display: block !important;
       }
 
+      /* Base cell padding/align */
       #arrivals thead th,
       #arrivals tbody td {
         padding: 0.55rem 0.7rem;
         vertical-align: middle;
-        white-space: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        text-overflow: clip;
-        max-width: 10rem; /* cap width so it doesn't blow up table */
-        -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
-        scrollbar-width: thin; /* Firefox: thinner scrollbar */
       }
 
-      #arrivals tbody td::-webkit-scrollbar {
-        height: 4px; /* very slim, not intrusive */
-      }
-      #arrivals tbody td::-webkit-scrollbar-thumb {
-        background: var(--pico-muted-border-color);
-        border-radius: 4px;
+      /* Let "Where now" wrap naturally; keep ETA/Time on one line */
+      #arrivals tbody td:nth-child(3) { white-space: normal; }
+      #arrivals thead th:nth-child(4),
+      #arrivals tbody td:nth-child(4),
+      #arrivals thead th:nth-child(5),
+      #arrivals tbody td:nth-child(5) { white-space: nowrap; }
+
+      /* Sticky header for usability on mobile */
+      #arrivals thead th {
+        position: sticky;
+        top: 0;
+        background: var(--pico-card-background-color);
+        z-index: 1;
       }
 
+      /* Mobile tweaks */
       @media (max-width: 600px) {
+        /* Hide Status column on narrow phones */
         #arrivals thead th:nth-child(6),
-        #arrivals tbody td:nth-child(6) {
-          display: none; /* hide Status on narrow phones */
-        }
-        #arrivals tbody td {
-          max-width: 8rem; /* even tighter for small screens */
-        }
+        #arrivals tbody td:nth-child(6) { display: none; }
+
+        /* Optional: hide Trip column to gain space */
+        #arrivals thead th:nth-child(2),
+        #arrivals tbody td:nth-child(2) { display: none; }
+
+        table { font-size: 0.95rem; }
+        h1 { font-size: 1.25rem; }
+        h2 { font-size: 1.05rem; }
+
+        /* Nearby button full width */
+        #useLocBtn { width: 100%; }
       }
 
-      #arrivals.refreshed {
-        animation: flash 0.3s;
+      /* === Desktop tweaks (>=900px) === */
+      @media (min-width: 900px) {
+        h1 { font-size: 1.6rem; line-height: 1.25; }
+        h2 { font-size: 1.25rem; }
+        /* Slightly tighter table */
+        #arrivals thead th,
+        #arrivals tbody td { padding: 0.5rem 0.65rem; }
       }
-      @keyframes flash {
-        from {
-          background-color: #fff3cd;
-        } /* light yellow */
-        to {
-          background-color: transparent;
-        }
+
+      /* === Compact table mode === */
+      .compact-table #arrivals thead th,
+      .compact-table #arrivals tbody td {
+        padding: 0.4rem 0.55rem;
+        line-height: 1.2;
+      }
+      /* Keep ETA/Time on one line; allow 'Where now' to wrap */
+      .compact-table #arrivals tbody td:nth-child(3) { white-space: normal; }
+      .compact-table #arrivals tbody td:nth-child(4),
+      .compact-table #arrivals tbody td:nth-child(5) { white-space: nowrap; }
+
+      /* === Mobile defaults (<=600px): use compact automatically === */
+      @media (max-width: 600px) {
+        :root { --pico-font-size: 16px; }          /* slightly smaller base */
+        body { font-size: var(--pico-font-size); } /* ensure it takes effect */
+        h1 { font-size: 1.25rem; }
+        h2 { font-size: 1.05rem; }
+        /* Hide less-important columns on phones */
+        #arrivals thead th:nth-child(2),
+        #arrivals tbody td:nth-child(2), /* Trip */
+        #arrivals thead th:nth-child(6),
+        #arrivals tbody td:nth-child(6)  /* Status */
+        { display: none; }
+        /* Apply compact mode on mobile */
+        body { /* acts like toggling compact-table */ }
+        #arrivals thead th,
+        #arrivals tbody td { padding: 0.4rem 0.5rem; line-height: 1.2; }
       }
     </style>
   </head>
   <body>
     <main class="container">
+      <header>
       <h1>
-      MTA 7/7X <span aria-hidden="true">
-        <img class="bullet" src="/icons/7.svg" alt="" aria-hidden="true">
-        <img class="bullet diamond" src="/icons/7d.svg" alt="" aria-hidden="true">
-      </span> — live arrivals
-    </h1>
-      <p class="muted">Realtime arrivals for 7 / 7X (default: Vernon Blvd-Jackson Av)</p>
+        MTA 7/7X <span aria-hidden="true">
+          <img class="bullet" src="/icons/7.svg" alt="" aria-hidden="true">
+          <img class="bullet diamond" src="/icons/7d.svg" alt="" aria-hidden="true">
+        </span> — live arrivals
+      </h1>
       </header>
+      <p class="muted">Realtime arrivals for 7 / 7X (default: Vernon Blvd-Jackson Av)</p>
+      <p id="liveClock" class="muted small"></p>
 
       <article class="twocol">
-        <!-- LEFT: Arrivals -->
+        <!-- LEFT: Nearby (filled by geolocation) -->
+        <aside hx-target="#nearby">
+          <header>
+            <h3>Nearby stops</h3>
+            <small>Find closest 7/7X stations from your location</small>
+          </header>
+
+          <p class="grid" style="align-items: center; gap: 0.5rem">
+            <button id="useLocBtn" class="primary btn-sm" type="button">
+              📍 Use my location
+            </button>
+            <small id="locLabel" class="muted">Loc: —</small>
+          </p>
+
+          <div class="table-wrap">
+            <div id="nearby"><em>Grant location to see nearby stops.</em></div>
+          </div>
+        </aside>
+
+        <!-- RIGHT: Arrivals -->
         <section>
           <progress
             id="loading"
@@ -210,25 +276,6 @@
             Refresh
           </button>
         </section>
-
-        <!-- RIGHT: Nearby (filled by geolocation) -->
-        <aside hx-target="#nearby">
-          <header>
-            <h3>Nearby stops</h3>
-            <small>Find closest 7/7X stations from your location</small>
-          </header>
-
-          <p class="grid" style="align-items: center; gap: 0.5rem">
-            <button id="useLocBtn" class="primary btn-sm" type="button">
-              📍 Use my location
-            </button>
-            <small id="locLabel" class="contrast">Loc: —</small>
-          </p>
-
-          <div class="table-wrap">
-            <div id="nearby"><em>Grant location to see nearby stops.</em></div>
-          </div>
-        </aside>
       </article>
     </main>
 
