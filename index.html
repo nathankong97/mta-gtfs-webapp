@@ -11,6 +11,8 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     />
 
+    <link rel="stylesheet" href="/src/style.css">
+
     <!-- htmx -->
     <script
       src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"
@@ -19,190 +21,6 @@
       defer
     ></script>
 
-    <style>
-      /* Prefer Helvetica (MTA look) where available; fall back safely elsewhere */
-      :root {
-        --pico-font-family-sans-serif:
-          "Helvetica Neue", Helvetica, Arial,
-          "Nimbus Sans", "Liberation Sans",
-          system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell,
-          "Noto Sans", sans-serif, var(--pico-font-family-emoji);
-        --pico-font-family: var(--pico-font-family-sans-serif);
-      }
-
-      /* Clean, aligned numerals for times/ETAs */
-      .eta, .time, .mono-numbers {
-        font-variant-numeric: tabular-nums;
-      }
-
-      .bullet { width: 1em; height: 1em; vertical-align: -0.15em; margin: 0 .15em; }
-      .bullet.diamond { transform: scale(1.18); }
-      @media (max-width: 480px) {
-        .bullet { width: .95em; height: .95em; vertical-align: -0.12em; }
-      }
-
-      /* Nearby panel tweaks */
-      .nearby-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      .nearby-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.6rem 0.8rem;
-        border: var(--pico-border-width) solid var(--pico-muted-border-color);
-        border-radius: 12px;
-        background: var(--pico-card-background-color);
-      }
-      .nearby-title {
-        display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
-      }
-      .nearby-title strong {
-        font-size: 0.95rem;
-        line-height: 1.1;
-      }
-      .nearby-title small {
-        color: var(--pico-muted-color);
-      }
-      .nearby-actions {
-        display: grid;
-        grid-template-columns: repeat(2, auto);
-        gap: 0.5rem;
-      }
-
-      .btn-sm {
-        font-size: 0.85rem;
-        padding: 0.35rem 0.55rem;
-        border-radius: 10px;
-      }
-      .twocol {
-        display: grid;
-        gap: 1rem;
-      }
-      @media (min-width: 900px) {
-        .twocol {
-          grid-template-columns: 1fr 2fr;
-        }
-      }
-      @media (max-width: 600px) {
-        #useLocBtn {
-          width: 100%;
-        }
-      } /* nicer button on phones */
-
-      @media (min-width: 900px) {
-      aside {
-        position: sticky;
-        top: 0.75rem;
-        align-self: start;
-        max-height: calc(100vh - 2rem);
-        overflow: auto;
-      }
-    }
-
-      /* Table container scroll (not per-cell) */
-      .table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      @media (max-width: 480px) {
-        h1 {
-          font-size: 1.25rem;
-        }
-        h2 {
-          font-size: 1.05rem;
-        }
-        table {
-          font-size: 0.95rem;
-        }
-      }
-      /* Subtle loading bar tied to hx-indicator */
-      #loading[aria-busy="true"] {
-        display: block !important;
-      }
-
-      /* Base cell padding/align */
-      #arrivals thead th,
-      #arrivals tbody td {
-        padding: 0.55rem 0.7rem;
-        vertical-align: middle;
-      }
-
-      /* Let "Where now" wrap naturally; keep ETA/Time on one line */
-      #arrivals tbody td:nth-child(3) { white-space: normal; }
-      #arrivals thead th:nth-child(4),
-      #arrivals tbody td:nth-child(4),
-      #arrivals thead th:nth-child(5),
-      #arrivals tbody td:nth-child(5) { white-space: nowrap; }
-
-      /* Sticky header for usability on mobile */
-      #arrivals thead th {
-        position: sticky;
-        top: 0;
-        background: var(--pico-card-background-color);
-        z-index: 1;
-      }
-
-      /* Mobile tweaks */
-      @media (max-width: 600px) {
-        /* Hide Status column on narrow phones */
-        #arrivals thead th:nth-child(6),
-        #arrivals tbody td:nth-child(6) { display: none; }
-
-        /* Optional: hide Trip column to gain space */
-        #arrivals thead th:nth-child(2),
-        #arrivals tbody td:nth-child(2) { display: none; }
-
-        table { font-size: 0.95rem; }
-        h1 { font-size: 1.25rem; }
-        h2 { font-size: 1.05rem; }
-
-        /* Nearby button full width */
-        #useLocBtn { width: 100%; }
-      }
-
-      /* === Desktop tweaks (>=900px) === */
-      @media (min-width: 900px) {
-        h1 { font-size: 1.6rem; line-height: 1.25; }
-        h2 { font-size: 1.25rem; }
-        /* Slightly tighter table */
-        #arrivals thead th,
-        #arrivals tbody td { padding: 0.5rem 0.65rem; }
-      }
-
-      /* === Compact table mode === */
-      .compact-table #arrivals thead th,
-      .compact-table #arrivals tbody td {
-        padding: 0.4rem 0.55rem;
-        line-height: 1.2;
-      }
-      /* Keep ETA/Time on one line; allow 'Where now' to wrap */
-      .compact-table #arrivals tbody td:nth-child(3) { white-space: normal; }
-      .compact-table #arrivals tbody td:nth-child(4),
-      .compact-table #arrivals tbody td:nth-child(5) { white-space: nowrap; }
-
-      /* === Mobile defaults (<=600px): use compact automatically === */
-      @media (max-width: 600px) {
-        :root { --pico-font-size: 16px; }          /* slightly smaller base */
-        body { font-size: var(--pico-font-size); } /* ensure it takes effect */
-        h1 { font-size: 1.25rem; }
-        h2 { font-size: 1.05rem; }
-        /* Hide less-important columns on phones */
-        #arrivals thead th:nth-child(2),
-        #arrivals tbody td:nth-child(2), /* Trip */
-        #arrivals thead th:nth-child(6),
-        #arrivals tbody td:nth-child(6)  /* Status */
-        { display: none; }
-        /* Apply compact mode on mobile */
-        body { /* acts like toggling compact-table */ }
-        #arrivals thead th,
-        #arrivals tbody td { padding: 0.4rem 0.5rem; line-height: 1.2; }
-      }
-    </style>
   </head>
   <body>
     <main class="container">
@@ -222,7 +40,6 @@
         <aside hx-target="#nearby">
           <header>
             <h3>Nearby stops</h3>
-            <small>Find closest 7/7X stations from your location</small>
           </header>
 
           <p class="grid" style="align-items: center; gap: 0.5rem">

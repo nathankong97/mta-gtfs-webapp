@@ -55,39 +55,46 @@ export default async function handler(req, res) {
               const nId = s.variants.N || `${s.idBase}N`;
               const sId = s.variants.S || `${s.idBase}S`;
               return `
-            <div class="nearby-item">
-              <div class="nearby-title">
-                <strong>${name}</strong>
-                <small>${distM} m away</small>
-              </div>
-              <div class="nearby-actions">
-                <button class="to-arrivals secondary outline btn-sm"
-                  data-stopid="${nId}"
-                  hx-get="/api/arrivals"
-                  hx-vals='{"stopId":"${nId}","horizonMin":30}'
-                  hx-target="#arrivals" hx-swap="innerHTML"
-                  hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
-                  View N
-                </button>
-                <button class="to-arrivals secondary outline btn-sm"
-                  data-stopid="${sId}"
-                  hx-get="/api/arrivals"
-                  hx-vals='{"stopId":"${sId}","horizonMin":30}'
-                  hx-target="#arrivals" hx-swap="innerHTML"
-                  hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
-                  View S
-                </button>
-              </div>
-            </div>`;
+              <div class="nearby-item">
+                <div class="nearby-title">
+                  <strong>${name}</strong>
+                  <small>${distM} m away</small>
+                </div>
+
+                <div class="nearby-actions">
+                  <button type="button"
+                    class="to-arrivals secondary outline btn-sm btn-dir btn-queens"
+                    aria-label="See ${name} Queens-bound arrivals"
+                    data-stopid="${nId}"
+                    hx-get="/api/arrivals"
+                    hx-vals='{"stopId":"${nId}","horizonMin":30}'
+                    hx-target="#arrivals" hx-swap="innerHTML"
+                    hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
+                    Queens
+                  </button>
+
+                  <button type="button"
+                    class="to-arrivals secondary outline btn-sm btn-dir btn-manhattan"
+                    aria-label="See ${name} Manhattan-bound arrivals"
+                    data-stopid="${sId}"
+                    hx-get="/api/arrivals"
+                    hx-vals='{"stopId":"${sId}","horizonMin":30}'
+                    hx-target="#arrivals" hx-swap="innerHTML"
+                    hx-on:htmx:before-request="document.getElementById('stopIdField').value=this.dataset.stopid">
+                    Manhattan
+                  </button>
+                </div>
+                </div>
+              </div>`;
             })
           ).then((arr) => arr.join(""));
 
     const html = `
-      <h3>Nearest 7/7X Stations</h3>
-      <p class="contrast">From: ${lat.toFixed(5)}, ${lon.toFixed(5)}</p>
+      <b>Nearest 7/7X Stations</b>
+      <br>
+      <small class="contrast">From: ${lat.toFixed(5)}, ${lon.toFixed(5)}</small>
       <div class="table-wrap">
         <table role="grid">
-          <thead><tr><th>Station</th><th>Distance</th><th colspan="2">Actions</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>

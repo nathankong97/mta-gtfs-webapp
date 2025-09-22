@@ -1,96 +1,349 @@
+/* =========================
+        Base / Typography
+        ========================= */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Prefer Helvetica (MTA look) with sane fallbacks */
+  --pico-font-family-sans-serif:
+    "Helvetica Neue", Helvetica, Arial,
+    "Nimbus Sans", "Liberation Sans",
+    system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell,
+    "Noto Sans", sans-serif, var(--pico-font-family-emoji);
+  --pico-font-family: var(--pico-font-family-sans-serif);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Monospace-like alignment for times/ETAs */
+.eta,
+.time,
+.mono-numbers {
+  font-variant-numeric: tabular-nums;
 }
 
-body {
-  margin: 0;
+/* =========================
+        Icons (line bullets)
+        ========================= */
+.bullet {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  margin: 0 .15em;
+}
+
+.bullet.diamond {
+  transform: scale(1.18);
+}
+
+/* diamond needs a touch more visual weight */
+
+/* Ultra-small phones can nudge size a bit */
+@media (max-width: 480px) {
+  .bullet {
+    width: .95em;
+    height: .95em;
+    vertical-align: -0.12em;
+  }
+}
+
+/* =========================
+        Layout
+        ========================= */
+.twocol {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Desktop: nearby (left) narrow, arrivals (right) wide; keep nearby sticky */
+@media (min-width: 900px) {
+  .twocol {
+    grid-template-columns: 1fr 2fr;
+  }
+
+  aside {
+    position: sticky;
+    top: 0.75rem;
+    align-self: start;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+  }
+
+  aside table {
+    font-size: 0.9rem;
+  }
+
+  aside .nearby-title strong {
+    font-size: 0.9rem;
+  }
+
+  aside .nearby-title small {
+    font-size: 0.8rem;
+  }
+
+  /* Slightly tighter headings & table on desktop */
+  h1 {
+    font-size: 1.45rem;
+    line-height: 1.25;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+  }
+
+  #arrivals thead th,
+  #arrivals tbody td {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .meta-line {
+    font-size: 0.9rem;
+    color: var(--pico-muted-color);
+    line-height: 1.3;
+  }
+
+  #useLocBtn {
+    width: auto;
+  }
+
+  /* don’t force full width on desktop */
+}
+
+/* Phone niceties */
+@media (max-width: 600px) {
+  :root {
+    --pico-font-size: 16px;
+  }
+
+  /* slightly smaller base */
+  h1 {
+    font-size: 1.25rem;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+  }
+
+  table {
+    font-size: 0.95rem;
+  }
+
+  #useLocBtn {
+    width: 100%;
+  }
+
+  /* friendlier touch target */
+}
+
+/* =========================
+        Nearby panel
+        ========================= */
+.nearby-list {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-h1 {
-  font-size: 3.2em;
+.nearby-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
+  border-radius: 12px;
+  background: var(--pico-card-background-color);
+}
+
+.nearby-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nearby-title strong {
+  font-size: 0.95rem;
   line-height: 1.1;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.nearby-title small {
+  color: var(--pico-muted-color);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
+.nearby-actions {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 0.5rem;
 }
 
-.card {
-  padding: 2em;
+.btn-sm {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 10px;
 }
 
-.read-the-docs {
-  color: #888;
+/* =========================
+        Tables (arrivals)
+        ========================= */
+/* Container scroll (avoid per-cell scrolling) */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Base cell padding / alignment */
+#arrivals thead th,
+#arrivals tbody td {
+  padding: 0.55rem 0.7rem;
+  vertical-align: middle;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Let "Where now" wrap; keep ETA/Time on one line */
+#arrivals tbody td:nth-child(3) {
+  white-space: normal;
+}
+
+#arrivals thead th:nth-child(4),
+#arrivals tbody td:nth-child(4),
+#arrivals thead th:nth-child(5),
+#arrivals tbody td:nth-child(5) {
+  white-space: nowrap;
+}
+
+/* Sticky header improves mobile usability */
+#arrivals thead th {
+  position: sticky;
+  top: 0;
+  background: var(--pico-card-background-color);
+  z-index: 1;
+}
+
+/* Hide lower-value columns on narrow phones (Trip, Status) */
+@media (max-width: 600px) {
+  #arrivals table {
+    font-size: 0.85rem;
+    /* slightly smaller text */
   }
-  a:hover {
-    color: #747bff;
+
+  #arrivals thead th,
+  #arrivals tbody td {
+    padding: 0.3rem 0.45rem;
+    /* reduce padding */
+    line-height: 1.25;
   }
-  button {
-    background-color: #f9f9f9;
+
+  /* Hide less important columns (already doing Trip + Status in your CSS) */
+  #arrivals thead th:nth-child(2),
+  #arrivals tbody td:nth-child(2),
+  /* Trip */
+  #arrivals thead th:nth-child(6),
+  #arrivals tbody td:nth-child(6)
+
+  /* Status */
+    {
+    display: none;
+  }
+
+  /* Keep ETA and Clock on one line */
+  #arrivals thead th:nth-child(4),
+  #arrivals tbody td:nth-child(4),
+  #arrivals thead th:nth-child(5),
+  #arrivals tbody td:nth-child(5) {
+    white-space: nowrap;
+  }
+
+  /* Allow “Where now” to wrap naturally */
+  #arrivals tbody td:nth-child(3) {
+    white-space: normal;
+  }
+}
+
+/* =========================
+        Misc
+        ========================= */
+/* Show loading indicator when hx-indicator is busy */
+#loading[aria-busy="true"] {
+  display: block !important;
+}
+
+/* --- Nearby row layout --- */
+.nearby-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nearby-title {
+  flex: 1 1 auto;
+}
+
+.nearby-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* --- Direction buttons (simple, readable) --- */
+.btn-dir {
+  padding: .40rem .65rem;
+  font-size: .9rem;
+  white-space: nowrap;
+  min-width: 8ch;
+  /* similar width so they don’t jitter */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* add arrows without making labels longer */
+.btn-queens::after {
+  content: " →";
+  opacity: .85;
+}
+
+.btn-manhattan::before {
+  content: "← ";
+  opacity: .85;
+}
+
+/* Desktop hover/focus: keep it subtle & accessible */
+.btn-dir:focus-visible {
+  outline: 2px solid var(--pico-primary);
+  outline-offset: 1px;
+}
+
+.btn-dir:hover {
+  box-shadow: 0 0 0 1px var(--pico-muted-border-color) inset;
+}
+
+/* --- Mobile: stack buttons under title; equal width --- */
+@media (max-width: 600px) {
+
+  /* Compact nearby stops cards */
+  .nearby-item {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.3rem 0.5rem;
+    gap: 0.25rem;
+    border-radius: 6px;
+  }
+
+  .nearby-title strong {
+    font-size: 0.85rem;
+    line-height: 1.15;
+  }
+
+  .nearby-title small {
+    font-size: 0.7rem;
+  }
+
+  /* Buttons inline, not stacked */
+  .nearby-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .btn-dir {
+    flex: 1 1 0;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 5px;
+    text-align: center;
   }
 }
