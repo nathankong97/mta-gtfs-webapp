@@ -237,9 +237,12 @@ export default async function handler(req, res) {
           `
             )
             .join("");
+    
+    let stopName = await labelStop(stopId);
+    stopName = stopName.replace(/\(S\)/g, " <small>(Manhattan bound)</small>").replace(/\(N\)/g, " <small>(Queens bound)</small>");
 
     const html = `
-      <h3>Arrivals — 7 / 7X • ${await labelStop(stopId)}</h3>
+      <h3>Current Station: ${stopName}</h3>
       <p class="contrast">
   Updated ${fmtNY(nowSec)} • Feed ts ${
       headerTs ? fmtNY(headerTs) : "—"
