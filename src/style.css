@@ -347,3 +347,51 @@
     text-align: center;
   }
 }
+
+/* --- Welcome Banner (soft looping version) --- */
+.banner {
+  position: relative;
+  margin: 1.2rem auto;
+  width: fit-content;
+  max-width: 90%;
+  padding: 0.8rem 1.6rem;
+  border-radius: 18px;
+  background: linear-gradient(120deg, #ffe8b3, #ffd0dc, #e3f2ff);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #3a3a3a;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation:
+    fadeLoop 8s ease-in-out infinite,
+    gradientShift 6s ease infinite;
+  z-index: 999;
+}
+
+/* Gradient shimmer */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Fade in/out loop */
+@keyframes fadeLoop {
+  0%, 15% { opacity: 0; transform: translateY(-8px); }
+  25%, 75% { opacity: 1; transform: translateY(0); }
+  85%, 100% { opacity: 0; transform: translateY(8px); }
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .banner {
+    font-size: 1.1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 14px;
+  }
+}

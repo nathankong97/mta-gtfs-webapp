@@ -1,144 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MTA 7 Line Live</title>
 
-    <!-- Pico CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MTA 7 Line Live</title>
 
-    <link rel="stylesheet" href="/src/style.css">
+  <!-- Pico CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
 
-    <!-- htmx -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"
-      integrity="sha384-ZBXiYtYQ6hJ2Y0ZNoYuI+Nq5MqWBr+chMrS/RkXpNzQCApHEhOt2aY8EJgqwHLkJ"
-      crossorigin="anonymous"
-      defer
-    ></script>
+  <link rel="stylesheet" href="/src/style.css">
 
-  </head>
-  <body>
-    <main class="container">
-      <header>
+  <!-- htmx -->
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"
+    integrity="sha384-ZBXiYtYQ6hJ2Y0ZNoYuI+Nq5MqWBr+chMrS/RkXpNzQCApHEhOt2aY8EJgqwHLkJ" crossorigin="anonymous"
+    defer></script>
+
+</head>
+
+<body>
+  <main class="container">
+    <header>
       <h1>
         MTA 7/7X <span aria-hidden="true">
           <img class="bullet" src="/icons/7.svg" alt="" aria-hidden="true">
           <img class="bullet diamond" src="/icons/7d.svg" alt="" aria-hidden="true">
-        </span> — live arrivals
+        </span> — Live Arrivals
       </h1>
-      </header>
-      <p class="muted">Realtime arrivals for 7 / 7X (default: Vernon Blvd-Jackson Av)</p>
-      <p id="liveClock" class="muted small"></p>
+    </header>
+    <div id="welcomeBanner" class="banner">
+      🏠 满满宝宝，欢迎回家 💛
+    </div>
+    <p class="muted">Realtime arrivals for 7 / 7X <span>(Default: Vernon Blvd-Jackson Av)</span></p>
+    <p id="liveClock" class="muted small"></p>
 
-      <article class="twocol">
-        <!-- LEFT: Nearby (filled by geolocation) -->
-        <aside hx-target="#nearby">
-          <header>
-            <h3>Nearby stops</h3>
-          </header>
+    <article class="twocol">
+      <!-- LEFT: Nearby (filled by geolocation) -->
+      <aside hx-target="#nearby">
+        <header>
+          <h3>Nearby stops</h3>
+        </header>
 
-          <p class="grid" style="align-items: center; gap: 0.5rem">
-            <button id="useLocBtn" class="primary btn-sm" type="button">
-              📍 Use my location
-            </button>
-          </p>
-
-          <div class="table-wrap">
-            <div id="nearby"><em>Grant location to see nearby stops.</em></div>
-          </div>
-        </aside>
-
-        <!-- RIGHT: Arrivals -->
-        <section>
-          <progress
-            id="loading"
-            class="secondary"
-            style="display: none"
-            aria-busy="false"
-          ></progress>
-          
-          <form id="arrivalsParams" hidden>
-            <input id="stopIdField" name="stopId" value="721S">
-            <input id="horizonField" name="horizonMin" value="30">
-          </form>
-
-          <div class="table-wrap">
-            <div
-              id="arrivals"
-              hx-get="/api/arrivals"
-              hx-include="#arrivalsParams"
-              hx-trigger="load, every 15s"
-              hx-swap="innerHTML"
-              hx-indicator="#loading"
-              hx-on:htmx:before-request="document.querySelector('#loading').setAttribute('aria-busy','true')"
-              hx-on:htmx:after-request="document.querySelector('#loading').setAttribute('aria-busy','false')"
-              hx-on:htmx:after-swap="this.classList.add('refreshed'); setTimeout(()=>this.classList.remove('refreshed'), 300)"
-            ></div>
-          </div>
-          
-          <button
-            class="contrast"
-            hx-get="/api/arrivals"
-            hx-include="#arrivalsParams"
-            hx-target="#arrivals"
-            hx-swap="innerHTML"
-            hx-indicator="#loading"
-          >
-            Refresh
+        <p class="grid" style="align-items: center; gap: 0.5rem">
+          <button id="useLocBtn" class="primary btn-sm" type="button">
+            📍 Use my location
           </button>
-        </section>
-      </article>
-    </main>
+        </p>
 
-    <script type="module" src="/main.js"></script>
-    <script>
-      (function () {
-        const el = document.getElementById("liveClock");
-        if (!el) return;
-        const fmt = new Intl.DateTimeFormat("en-US", {
-          timeZone: "America/New_York",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
-        function tick() {
-          el.textContent = "NY time: " + fmt.format(new Date());
+        <div class="table-wrap">
+          <div id="nearby"><em>Grant location to see nearby stops.</em></div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Arrivals -->
+      <section>
+        <progress id="loading" class="secondary" style="display: none" aria-busy="false"></progress>
+
+        <form id="arrivalsParams" hidden>
+          <input id="stopIdField" name="stopId" value="721S">
+          <input id="horizonField" name="horizonMin" value="30">
+        </form>
+
+        <div class="table-wrap">
+          <div id="arrivals" hx-get="/api/arrivals" hx-include="#arrivalsParams" hx-trigger="load, every 15s"
+            hx-swap="innerHTML" hx-indicator="#loading"
+            hx-on:htmx:before-request="document.querySelector('#loading').setAttribute('aria-busy','true')"
+            hx-on:htmx:after-request="document.querySelector('#loading').setAttribute('aria-busy','false')"
+            hx-on:htmx:after-swap="this.classList.add('refreshed'); setTimeout(()=>this.classList.remove('refreshed'), 300)">
+          </div>
+        </div>
+
+        <button class="contrast" hx-get="/api/arrivals" hx-include="#arrivalsParams" hx-target="#arrivals"
+          hx-swap="innerHTML" hx-indicator="#loading">
+          Refresh
+        </button>
+      </section>
+    </article>
+  </main>
+
+  <script type="module" src="/main.js"></script>
+  <script>
+    (function () {
+      const el = document.getElementById("liveClock");
+      if (!el) return;
+      const fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      function tick() {
+        el.textContent = "NY time: " + fmt.format(new Date());
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+  <script>
+    /**
+     * Hard guard: any htmx request fired from inside the Nearby <aside>
+     * will swap into #nearby (never #arrivals), unless the triggering element
+     * explicitly marks itself as "to-arrivals".
+     *
+     * Usage for opt-out (when you *do* want to update the arrivals table from a Nearby item):
+     *   <a class="to-arrivals" hx-get="/api/arrivals?stopId=721S" hx-target="#arrivals">…</a>
+     */
+    (function () {
+      document.body.addEventListener("htmx:beforeSwap", function (e) {
+        const origin = e.detail.elt;
+        if (!origin) return;
+
+        const inNearby = origin.closest("aside"); // our Nearby panel
+        const explicitToArrivals =
+          origin.classList && origin.classList.contains("to-arrivals");
+
+        // If the request originates inside Nearby and is NOT explicitly targeting arrivals,
+        // force the swap target to #nearby.
+        if (inNearby && !explicitToArrivals) {
+          const nearbyTarget = document.getElementById("nearby");
+          if (nearbyTarget) e.detail.target = nearbyTarget;
         }
-        tick();
-        setInterval(tick, 1000);
-      })();
-    </script>
-    <script>
-      /**
-       * Hard guard: any htmx request fired from inside the Nearby <aside>
-       * will swap into #nearby (never #arrivals), unless the triggering element
-       * explicitly marks itself as "to-arrivals".
-       *
-       * Usage for opt-out (when you *do* want to update the arrivals table from a Nearby item):
-       *   <a class="to-arrivals" hx-get="/api/arrivals?stopId=721S" hx-target="#arrivals">…</a>
-       */
-      (function () {
-        document.body.addEventListener("htmx:beforeSwap", function (e) {
-          const origin = e.detail.elt;
-          if (!origin) return;
+      });
+    })();
+  </script>
+</body>
 
-          const inNearby = origin.closest("aside"); // our Nearby panel
-          const explicitToArrivals =
-            origin.classList && origin.classList.contains("to-arrivals");
-
-          // If the request originates inside Nearby and is NOT explicitly targeting arrivals,
-          // force the swap target to #nearby.
-          if (inNearby && !explicitToArrivals) {
-            const nearbyTarget = document.getElementById("nearby");
-            if (nearbyTarget) e.detail.target = nearbyTarget;
-          }
-        });
-      })();
-    </script>
-  </body>
 </html>

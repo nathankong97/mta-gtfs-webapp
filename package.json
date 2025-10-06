@@ -12,6 +12,7 @@
     "vite": "^7.1.2"
   },
   "dependencies": {
-    "gtfs-realtime-bindings": "^1.1.1"
+    "gtfs-realtime-bindings": "^1.1.1",
+    "vercel": "^48.2.1"
   }
 }

@@ -1,6 +1,32 @@
 const indicator = document.querySelector("#loading");
 const locLabel = document.getElementById("locLabel");
 
+// --- Time-windowed welcome banner ---
+const banner = document.getElementById("welcomeBanner");
+if (banner) {
+  // Mon=1 ... Thu=4
+  const now = new Date();
+  const day = now.getDay();
+  const mins = now.getHours() * 60 + now.getMinutes();
+
+  const isMonThu = day >= 1 && day <= 4;
+  const inMorning = mins >= (8 * 60 + 30) && mins < (10 * 60);   // 8:30–10:00
+  const inEvening = mins >= (17 * 60) && mins < (19 * 60);       // 17:00–19:00
+
+  banner.setAttribute("aria-live", "polite"); // announce changes gently
+
+  if (isMonThu && inMorning) {
+    banner.textContent = "🌞 满满宝宝，上班加油 🌞";
+    banner.style.display = "";   // show
+  } else if (isMonThu && inEvening) {
+    banner.textContent = "🏠 满满宝宝，欢迎回家 💛";
+    banner.style.display = "";   // show
+  } else {
+    banner.style.display = "none"; // hide outside windows
+  }
+}
+
+
 function setBusy(v) {
   if (!indicator) return;
   indicator.setAttribute("aria-busy", v ? "true" : "false");
