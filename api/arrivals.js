@@ -25,7 +25,9 @@ async function labelStop(stopId) {
   if (!info) return stopId; // fallback to raw id
   // Preserve direction suffix if present (e.g., 721S)
   const suffix = /[NSEW]$/.test(stopId) ? ` (${stopId.slice(-1)})` : "";
-  return `${info.name}${suffix}`;
+  // For now, we don't need the suffix - S/N;
+  // return `${info.name}${suffix}`;
+  return info.name;
 }
 
 function whereNowFromTripUpdate(tu, nowSec) {

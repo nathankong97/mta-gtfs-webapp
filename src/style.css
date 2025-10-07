@@ -395,3 +395,59 @@
     border-radius: 14px;
   }
 }
+
+
+/* === Nearby collapsible (clean) === */
+.nearby-collapse {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 10px;
+  background: var(--pico-card-background-color);
+  margin: 0;
+}
+
+/* Summary toggle */
+.nearby-toggle {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem .75rem;
+  font-size: .95rem;
+  cursor: pointer;
+  user-select: none;
+
+  /* give it a pill look that matches the card */
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 8px;
+  background: var(--pico-card-background-color);
+  margin-bottom: .2rem;
+}
+
+/* Remove ALL built-in arrows (UA + Pico) so only our chevron shows */
+summary::-webkit-details-marker,
+summary::marker,
+.nearby-toggle::after { content: "" !important; display: none !important; }
+
+/* Our chevron */
+.nearby-toggle .chev {
+  margin-left: auto;
+  width: .65rem; height: .65rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg) translateY(-1px); /* tiny lift */
+  opacity: .75;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+/* Open/close states */
+.nearby-collapse .label-hide { display: none; }
+.nearby-collapse[open] .label-show { display: none; }
+.nearby-collapse[open] .label-hide { display: inline; }
+.nearby-collapse[open] .chev { transform: rotate(45deg); opacity: .9; }
+
+/* Body spacing (tight) */
+.nearby-collapse > .table-wrap { margin-top: -.25rem; padding: .25rem .6rem .6rem; }
+
+/* Mobile tap target */
+@media (max-width: 600px) {
+  .nearby-toggle { font-size: .95rem; padding: .6rem .8rem; }
+}
